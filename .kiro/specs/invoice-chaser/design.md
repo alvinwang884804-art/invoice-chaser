@@ -1,5 +1,13 @@
 # Design — Invoice Chaser
 
+> **Build note (Nov 13, 2026):** this design originally specified SQLite via
+> Prisma, but Prisma v8 (the version installed in the build environment) is a
+> cloud-platform CLI with no SQLite support, and Prisma ORM v5 engine binaries
+> could not download. The build therefore uses `better-sqlite3` directly with a
+> hand-written type-safe db layer (`src/lib/db/`). The data model is unchanged
+> and is documented in `prisma/schema.prisma` for a future Postgres migration.
+> Everything else in this document stands as written.
+
 ## Overview
 
 A single Next.js application (App Router, TypeScript) with a SQLite database

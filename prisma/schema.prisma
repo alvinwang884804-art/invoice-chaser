@@ -1,0 +1,72 @@
+// Prisma schema — kept for documentation and future Postgres migration.
+// In the demo/local build, better-sqlite3 is used directly (see src/lib/db/).
+// This schema is the authoritative data model reference.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  clientId    String
+  number      String
+  amountCents Int       // stored as integer cents, never float
+  dueDate     DateTime
+  status      String    @default("sent") // sent | overdue | paid
+  paymentLink String?
+  createdAt   DateTime  @default(now())
+
+  client    Client    @relation(fields: [clientId], references: [id])
+  payments  Payment[]
+  reminders Reminder[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  amountCents Int
+  method      String?  // cash | card | e-transfer | other
+  paidAt      DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Reminder {
+  id         String   @id @default(cuid())
+  invoiceId  String
+  step       Int      // 1 | 7 | 14 | 30
+  channel    String   // email | sms
+  templateId String
+  sentAt     DateTime @default(now())
+  status     String   // sent | skipped | failed
+  note       String?
+
+  invoice  Invoice  @relation(fields: [invoiceId], references: [id])
+  template Template @relation(fields: [templateId], references: [id])
+}
+
+model Template {
+  id      String  @id @default(cuid())
+  step    Int     // 1 | 7 | 14 | 30
+  channel String  // email | sms
+  subject String? // email only
+  body    String  // supports {{clientName}} {{invoiceNumber}} {{amount}} {{dueDate}}
+
+  reminders Reminder[]
+}
