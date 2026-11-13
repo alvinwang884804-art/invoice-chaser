@@ -23,16 +23,18 @@ export type ReminderStep = { step: 1 | 7 | 14 | 30; channel: "email" | "sms" };
  * Due date itself is NOT overdue (day 0).
  */
 export function calendarDaysOverdue(dueDate: string, today: Date): number {
-  // Parse as local date (YYYY-MM-DD) to avoid timezone issues
+  // Parse YYYY-MM-DD and normalize both sides to UTC midnight so DST
+  // transitions (which shorten or lengthen a local day) cannot affect
+  // the millisecond difference.
   const [year, month, day] = dueDate.split("-").map(Number);
-  const due = new Date(year, month - 1, day);
-  const todayMidnight = new Date(
+  const dueUtc = Date.UTC(year, month - 1, day);
+  const todayUtc = Date.UTC(
     today.getFullYear(),
     today.getMonth(),
     today.getDate()
   );
-  const diffMs = todayMidnight.getTime() - due.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffMs = todayUtc - dueUtc;
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
 export interface InvoiceForSchedule {

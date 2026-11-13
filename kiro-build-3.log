@@ -1,0 +1,27 @@
+Warning: Kiro CLI is running as root. Tools and commands can create root-owned files or change permissions. Restart without sudo unless elevated access is intentional.
+Hide this warning: kiro-cli settings app.warnOnElevatedPrivileges false
+(node:43978) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:43978) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=11
+[tool] Read File
+[tool] status: InProgress
+[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=28
+[tool] status: Completed
+The bug is clear. Both `due` and `todayMidnight` are constructed as local midnight, but `getTime()` on a local midnight gives different UTC offsets across DST transitions, so the ms difference can be 23 hours instead of 24, and `Math.floor` rounds that down by one day.
+
+The fix: normalize both dates to UTC midnight before differencing, using `Date.UTC`.
+[tool] Replace in File
+[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=225
+[tool] status: Pending
+[tool] status: Completed
+[tool] Run the full test suite
+[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=33
+[tool] status: InProgress
+[tool] status: InProgress
+[tool] status: Completed
+All 46 tests pass.
+
+The fix replaces `new Date(y, m, d).getTime()` (local midnight, whose UTC offset shifts across DST) with `Date.UTC(y, m, d)` for both the due date and today. `Date.UTC` always returns an offset-free UTC midnight, so the millisecond difference is always an exact multiple of 86 400 000. `Math.round` is used instead of `Math.floor` as a belt-and-suspenders guard against any sub-millisecond floating-point noise, though with integer UTC values it makes no practical difference.[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=63
+
+KIRO_FIX_EXIT=0
