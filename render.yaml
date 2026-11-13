@@ -1,0 +1,19 @@
+# Render Blueprint — Invoice Chaser (Kiroween 2026)
+# Deploy: Render dashboard → New → Blueprint → connect this repo → Apply.
+# Nothing here deploys on its own; this file only describes the service.
+# Cost: $0 (Render free Web Service, no card required).
+
+services:
+  - type: web
+    name: invoice-chaser
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build && npm run db:seed
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
