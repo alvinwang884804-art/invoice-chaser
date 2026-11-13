@@ -1,0 +1,26 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+
+# Environment (never commit real keys)
+.env
+.env.local
+.env*.local
+
+# Database (local dev only; production uses Postgres)
+*.db
+*.db-journal
+
+# OS / editor
+.DS_Store
+*.local
+
+# IMPORTANT — Kiroween rules: NEVER add .kiro to this file.
+# The /.kiro directory MUST be committed at the repo root — it proves
+# Kiro was used (specs, hooks, steering). Excluding it can disqualify
+# the submission.
+
+# Build log (local only)
+kiro-build.log
